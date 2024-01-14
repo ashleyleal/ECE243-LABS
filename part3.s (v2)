@@ -1,0 +1,17 @@
+/*ECE243: Lab 1*/ 
+/*part3.s v2*/ 
+.global _start
+
+BEG:
+    movia   r8, 0      # Counter
+    movia   r9, 30     # Limit
+
+BODY:     
+    addi r8, r8, 1 # Increment counter
+
+COND:
+  blt r8, r9, BODY # go to body if counter below limit, otherwise go to inf loop
+  br AFTER
+
+AFTER:
+  br AFTER # infinite loop that does nothing
