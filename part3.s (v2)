@@ -1,7 +1,11 @@
 /*ECE243: Lab 1*/ 
-/*part3.s v2*/ 
+/*part3.s v2*/
+/*Computes the sum of the numbers from 1 to 30, in a loop that
+explicitly computes the sum*/
+
 .global _start
 
+# Initialize values of Registers
 _start:
     movia   r8, 0      # Counter
     movia   r9, 30     # Limit
