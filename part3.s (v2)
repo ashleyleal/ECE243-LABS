@@ -2,12 +2,14 @@
 /*part3.s v2*/ 
 .global _start
 
-BEG:
+_start:
     movia   r8, 0      # Counter
     movia   r9, 30     # Limit
+	movia	r12, 0 	   # Sum
 
 BODY:     
     addi r8, r8, 1 # Increment counter
+	add r12, r12, r8 # Add counter to sum reg
 
 COND:
   blt r8, r9, BODY # go to body if counter below limit, otherwise go to inf loop
@@ -15,3 +17,5 @@ COND:
 
 AFTER:
   br AFTER # infinite loop that does nothing
+	
+	
