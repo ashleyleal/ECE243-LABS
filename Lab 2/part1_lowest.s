@@ -5,11 +5,11 @@ _start: movia r8, result # the address of the result
 	movia r10, numbers  # the address of the numbers is in r10
 	
 	
-/* keep largest number so far in r11 */
+/* keep lowest number so far in r11 */
 
 	ldw	r11,(r10)
 	
-/* loop to search for biggest number */
+/* loop to search for lowest number */
 
 loop: subi r9, r9, 1
        ble r9, r0, finished
