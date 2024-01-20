@@ -18,9 +18,9 @@ loop: subi r9, r9, 1
 	   
 	   ldw  r12, (r10)  # load the next number into r12
 	   
-	   ble  r11, r12, loop  # if the current biggest is still biggest, go to loop
+	   ble  r11, r12, loop  # if the current smallest is still smallest, go to loop
 	   
-	   mov r11,r12   # otherwise new number is biggest, put it into r11
+	   mov r11,r12   # otherwise new number is smallest, put it into r11
 	   br  loop
 	   
 
