@@ -26,7 +26,7 @@ loop:
     beq r14, r0, finished  # if end of list send the default value
     addi r11, r11, 4    # add 4 to pointer to the numbers to point to next one
     addi r12, r12, 1    # increment index
-    ldw  r14, 0(r11)    # load next student number
+    ldw  r14, (r11)    # load next student number
     br loop
 	
 calculate:
