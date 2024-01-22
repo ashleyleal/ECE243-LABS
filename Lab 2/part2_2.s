@@ -33,6 +33,9 @@ calculate:
 	ldb r13, (r15) # put the value of r15 in r13
 	
 finished: stb r13, (r8) # store the answer into result; change this to stb from stw for byte
+	.equ LEDs, 0xFF200000
+	movia r25, LEDs
+	stwio r13, (r25)
 iloop: br iloop
 
 
@@ -55,7 +58,3 @@ Snumbers: .word 10392584, 423195, 644370, 496059, 296800
 Grades: .byte 99, 68, 90, 85, 91, 67, 80
         .byte 66, 95, 91, 91, 99, 76, 68  
         .byte 69, 93, 90, 72
-	
-	
-
-	
