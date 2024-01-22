@@ -6,7 +6,7 @@ _start:
 /* r10 has the student number being searched */
 
 
-	movia r10, 718293		# r10 is where you put the student number being searched for
+	movia r10, 10392584		# r10 is where you put the student number being searched for
 
 /* Your code goes here  */
 
