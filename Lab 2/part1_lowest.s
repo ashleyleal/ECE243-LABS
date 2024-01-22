@@ -26,6 +26,10 @@ loop: subi r9, r9, 1
 
 
 finished: stw r11,(r8)    # store the answer into result
+	.equ LEDs, 0xFF200000
+	movia r25, LEDs
+	stwio r11, (r25)
+
 iloop: br iloop
 
 result: .word 0
@@ -35,5 +39,9 @@ numbers:
 	.word 1, 8, 2
 	.word 9, 15, 13, 7
 	.word 10, 14, 11
+	
+	
+	
+	
 	
 	
