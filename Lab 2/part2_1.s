@@ -41,6 +41,9 @@ calculate:
 	ldw r13, (r15) # put the value of r15 in r13
 	
 finished: stw r13, (r8) # store the answer into result
+	.equ LEDs, 0xFF200000
+	movia r25, LEDs
+	stwio r13, (r25)
 iloop: br iloop
 
 
