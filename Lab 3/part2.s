@@ -11,6 +11,19 @@ Idea:
 	- Otherwise continue with next iteration
 */
 
+.text
+.global _start
+
+_start:
+    movia r3, InputWord   # the address of InputWord is in r3
+    ldw r4, 0(r3)         # the value of InputWord is in r4
+    call ONES             # call ONES subroutine
+    movia r5, Answer      # the value of Address is in r5
+    stw r2, 0(r5)         # store result from r2 to Answer
+
+
+endiloop: br endiloop
+
 #Subroutine that counts bits
 ONES: 
     movi r2, 0            # store the value of the counter in r2
@@ -28,20 +41,6 @@ ONES:
 	bne r7, r0, check
 
     ret                  # return from subroutine
-
-
-.text
-.global _start
-
-_start:
-    movia r3, InputWord   # the address of InputWord is in r3
-    ldw r4, 0(r3)         # the value of InputWord is in r4
-    call ONES             # call ONES subroutine
-    movia r5, Answer      # the value of Address is in r5
-    stw r2, 0(r5)         # store result from r2 to Answer
-
-
-endiloop: br endiloop
 
 .data
 InputWord: .word 0x4a01fead
