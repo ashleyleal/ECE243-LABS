@@ -81,3 +81,6 @@ TEST_NUM: .word 0x4a01fead, 0xF677D671,0xDC9758D5,0xEBBD45D2,0x8059519D
 LargestOnes: .word 0
 LargestZeroes: .word 0
 	
+# A larger delay is needed on the physical board for the LEDs to flash at 
+# the same speed, which means it operates faster than the simulator. This is 
+# because they operate at different clock speeds
