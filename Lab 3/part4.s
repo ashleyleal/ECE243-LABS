@@ -33,8 +33,8 @@ determine_zeroes:
 	call ONES             # call ONES subroutine
 	blt r2, r10, next_iteration  # if current count is less, skip updating LargesetZeroes and proceed to next iteration
 	# otherwise, update the value of largest zeroes so far and the address
-	mov r10, r2  # update LargestOnes value
-	ldw r6, (r3)  # update LargestOnes address
+	mov r10, r2  # update LargestZeroes value
+	ldw r6, (r3)  # update LargestZeroes address
 	
 next_iteration:
 	addi r3, r3, 4 # add 4 to point to next word
@@ -83,4 +83,4 @@ LargestZeroes: .word 0
 	
 # A larger delay is needed on the physical board for the LEDs to flash at 
 # the same speed, which means it operates faster than the simulator. This is 
-# because they operate at different clock speeds
+# because they operate at different clock speeds.
