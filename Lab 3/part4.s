@@ -44,9 +44,9 @@ finished:
 	br endiloop
 		
 endiloop: 
-	stwio r5, (r25)
+	stwio r9, (r25)
 	call DELAY
-	stwio r6, (r25)
+	stwio r10, (r25)
 	call DELAY
 	br endiloop
 
