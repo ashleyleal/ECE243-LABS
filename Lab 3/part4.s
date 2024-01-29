@@ -68,7 +68,7 @@ skip:
     ret                  # return from subroutine
 
 DELAY:
-    movia r12, 2000000  # set starting point for delay counter
+    movia r12, 20000000  # set starting point for delay counter
 	delay_loop:
 		subi r12,r12,1       # subtract 1 from delay
 		bne r12,r0, delay_loop   # continue subtracting if delay has not elapsed
