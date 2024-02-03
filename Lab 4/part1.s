@@ -25,22 +25,27 @@ key0:
     ldwio r4, 0(r8) # Read the status of the LEDs into r4
     xori r4, r4, 0x1 # Toggle LED 0
     stwio r4, 0(r8) # Update LEDs
+	stwio r2, 0(r9) # Reset the edge
     br polling
     
 key1:
     ldwio r4, 0(r8) # Read the status of the LEDs into r4
     xori r4, r4, 0x2 # Toggle LED 1
     stwio r4, 0(r8) # Update LEDs
+	stwio r2, 0(r9) # Reset the edge
     br polling
     
 key2:
     ldwio r4, 0(r8) # Read the status of the LEDs into r4
     xori r4, r4, 0x4 # Toggle LED 2
     stwio r4, 0(r8) # Update LEDs
+	stwio r2, 0(r9) # Reset the edge
     br polling
     
 key3:
     ldwio r4, 0(r8) # Read the status of the LEDs into r4
     xori r4, r4, 0x8 # Toggle LED 3
     stwio r4, 0(r8) # Update LEDs
+	stwio r2, 0(r9) # Reset the edge
     br polling
+	
