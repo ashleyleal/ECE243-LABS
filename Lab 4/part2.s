@@ -1,7 +1,7 @@
 .global _start
 _start:
-    movia r8, 0xFF200000     # LEDs base address
-    movia r9, 0xFF200050     # Buttons base address (Edge Capture)
+    movia r8, 0xFF200000 # LEDs
+    movia r9, 0xFF200050 # Buttons (active low)
     movi r3, 255             # Maximum counter value
     movi r5, 1               # Initial state 
     movi r4, 0               # Counter start value
