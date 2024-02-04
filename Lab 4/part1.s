@@ -58,3 +58,5 @@ button3:
 update_state:
     mov r10, r2 # Update previous state with current state
     br polling
+
+    #NEED TO ADD LIMITS
