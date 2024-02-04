@@ -3,6 +3,9 @@ _start:
     movia r8, 0xFF200000 # LEDs
     movia r9, 0xFF200050 # Buttons (active low)
     movia r10, 0x0 # Initialize previous state of buttons to all 0
+	
+	movia r6, 1 # Lower Limit for decrement
+	movia r7, 15 # Upper limit for increment
     
 polling:
     ldwio r2, 0(r9) # Read current value from buttons into r2
@@ -39,12 +42,14 @@ button0:
 
 button1:
     ldwio r4, 0(r8) # Read the status of the LEDs into r4
+	beq r4, r7, update_state # Skip increment if at limit already
     addi r4, r4, 1	# Add 1
     stwio r4, 0(r8) # Update LEDs
     br update_state
 
 button2:
     ldwio r4, 0(r8) # Read the status of the LEDs into r4
+	beq r4, r6, update_state # Skip decrement if at limit already
     subi r4, r4, 1	# Subtract 1
     stwio r4, 0(r8) # Update LEDs
     br update_state
@@ -58,5 +63,3 @@ button3:
 update_state:
     mov r10, r2 # Update previous state with current state
     br polling
-
-    #NEED TO ADD LIMITS
