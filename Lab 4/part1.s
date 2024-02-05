@@ -26,7 +26,7 @@ polling:
     andi r12, r11, 0x4 # Isolate button 2 change
     bne r12, r0, button2
     
-    # Check for negedge on Button 3
+    # Check for negedge on Button 3 
     andi r12, r11, 0x8 # Isolate button 3 change
     bne r12, r0, button3
     
@@ -49,6 +49,7 @@ button1:
 
 button2:
     ldwio r4, 0(r8) # Read the status of the LEDs into r4
+	beq r4, r0, button0
 	beq r4, r6, update_state # Skip decrement if at limit already
     subi r4, r4, 1	# Subtract 1
     stwio r4, 0(r8) # Update LEDs
