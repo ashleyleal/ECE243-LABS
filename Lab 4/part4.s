@@ -14,7 +14,7 @@
 .equ LED_BASE, 0xFF200000       # LEDs base address
 .equ BUTTON_BASE, 0xFF200050    # Buttons base address
 
-.equ MAX_SECONDS, 8            # Maximum seconds before wrap-around
+.equ MAX_SECONDS, 7            # Maximum seconds before wrap-around
 .equ MAX_HUNDREDTHS, 99         # Maximum hundredths of a second before incrementing seconds
 
 _start:
@@ -74,4 +74,4 @@ poll_timer:
     beq r14, r0, poll_timer     # if TO bit is not set, keep polling
     movi r14, 0x1
     stwio r14, TIMER0_STATUS(r10) # Clear TO bit
-    ret 
+    ret
