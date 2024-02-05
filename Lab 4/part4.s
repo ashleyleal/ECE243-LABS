@@ -14,7 +14,7 @@
 .equ LED_BASE, 0xFF200000       # LEDs base address
 .equ BUTTON_BASE, 0xFF200050    # Buttons base address
 
-.equ MAX_SECONDS, 7            # Maximum seconds before wrap-around
+.equ MAX_SECONDS, 8            # Maximum seconds before wrap-around
 .equ MAX_HUNDREDTHS, 99         # Maximum hundredths of a second before incrementing seconds
 
 _start:
