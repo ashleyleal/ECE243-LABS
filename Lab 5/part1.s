@@ -12,42 +12,33 @@
 
 
     .section .text
-    .globl  _start                  # Provide program starting address to linker
+    .globl  _start                  
 
 _start:
- 	# Display 1 on HEX5
-    movia   r4, 0x01                # Load the value 1 into r4
-    movia   r5, 0x05                # HEX5 for display
-    call    HEX_DISP                # Call display subroutine
+    movia r12, 0
+    movia r13, 0xF
 
-    # Display 2 on HEX4
-    movia   r4, 0x02                # Load the value 2 into r4
-    movia   r5, 0x04                # HEX4 for display
-    call    HEX_DISP                # Call display subroutine
+loop:
+    # Display the current value of r12 on HEX5
+    mov   r4, r12
+    movia r5, 0x05
+    call  HEX_DISP
+    call  DELAY
 
-    # Display 3 on HEX3
-    movia   r4, 0x03                # Load the value 3 into r4
-    movia   r5, 0x03                # HEX3 for display
-    call    HEX_DISP                # Call display subroutine
+    # Blank the display
+    movia r4, 0x10
+	movia r5, 0x05
+    call  HEX_DISP
+    call  DELAY
 
-    # Display 4 on HEX2
-    movia   r4, 0x04                # Load the value 4 into r4
-    movia   r5, 0x02                # HEX2 for display
-    call    HEX_DISP                # Call display subroutine
+    # Increment r12 and check if it's equal to r13, if so, reset
+    addi  r12, r12, 1
+    beq   r12, r13, reset
+    br    loop
 
-    # Display 5 on HEX1
-    movia   r4, 0x05                # Load the value 5 into r4
-    movia   r5, 0x01                # HEX1 for display
-    call    HEX_DISP                # Call display subroutine
-
-    # Display 6 on HEX0
-    movia   r4, 0x06                # Load the value 6 into r4
-    movia   r5, 0x00                # HEX0 for display
-    call    HEX_DISP                # Call display subroutine
-
-    # loop fever
-    br      _start                 
-
+reset:
+    movia r12, 0
+    br    loop
 
 HEX_DISP:   movia    r8, BIT_CODES         # starting address of the bit codes
 	    andi     r6, r4, 0x10	   			# get bit 4 of the input into r6
@@ -78,12 +69,18 @@ FIRST_SET:
 			stwio    r5, 0(r8)		       # store back
 END:			
 			ret
-			
+		
+		
+DELAY:
+    movia r11, 5000000            # Delay loop counter
+delay_loop:
+    subi r11, r11, 1             # Decrement delay counter
+    bne r11, r0, delay_loop      # Loop until counter reaches 0
+    ret 
+		
 BIT_CODES:  .byte     0b00111111, 0b00000110, 0b01011011, 0b01001111
 			.byte     0b01100110, 0b01101101, 0b01111101, 0b00000111
 			.byte     0b01111111, 0b01100111, 0b01110111, 0b01111100
 			.byte     0b00111001, 0b01011110, 0b01111001, 0b01110001
 
             .end
-			
-
