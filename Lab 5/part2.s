@@ -90,11 +90,11 @@ KEY_ISR: # Control the HEX displays here, can move to different file in Monitor 
     addi    sp, sp, 4
 
     # Finish the ISR
-    ret
+    ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
 
 TOGGLE_HEX0:
 	ldwio   r6, 0(r7)		  # Read the current
-    xor     r6, r6, r0      		# Toggle the state
+    xori     r6, r6, 0x00      		# Toggle the state
     mov   	r4, r6
     movia 	r5, 0x00		
     call HEX_DISP
@@ -102,25 +102,25 @@ TOGGLE_HEX0:
 
 TOGGLE_HEX1:
 	ldwio   r6, 0(r7)		  # Read the current
-    xor     r6, r6, r0      		# Toggle the state
+    xori     r6, r6, 0x10      		# Toggle the state
     mov   	r4, r6
-    movia 	r5, 0x00		
+    movia 	r5, 0x01		
     call HEX_DISP
 	ret
 	
 TOGGLE_HEX2:
 	ldwio   r6, 0(r7)		  # Read the current
-    xor     r6, r6, r0      		# Toggle the state
+    xori     r6, r6, 0x20      		# Toggle the state
     mov   	r4, r6
-    movia 	r5, 0x00		
+    movia 	r5, 0x02		
     call HEX_DISP
 	ret
 
 TOGGLE_HEX3:
 	ldwio   r6, 0(r7)		  # Read the current
-    xor     r6, r6, r0      		# Toggle the state
+    xori     r6, r6, 0x30      		# Toggle the state
     mov   	r4, r6
-    movia 	r5, 0x00		
+    movia 	r5, 0x03		
     call HEX_DISP
 	ret
 
@@ -128,19 +128,22 @@ enable_button_interrupts:
     movia   r4, BUTTONS_BASE       # Load base address of buttons into r4
     
 	# Enable interrupts for all buttons by setting their corresponding bits in the interrupt mask register
-    movi    r5, 0xF                # we have 4 buttons and want to enable interrupts for all
+    movi    r5, 0xF         # we have 4 buttons and want to enable interrupts for all
     stwio   r5, 8(r4)       # Write to interrupt mask register at offset
-    
+	
 	# clear any pending button interrupts by writing to the edge capture register
     stwio   r5, 12(r4)   # Write to edge capture register at offset to clear it
 
-    # Read the current value of the status register, set the PIE (Process Interrupt Enable) bit, and write it back (not sure about this part)
-    rdctl   r6, status             # Read the status register into r6
-    ori     r6, r6, 1              # Set the PIE bit to enable interrupts
-    wrctl   status, r6             # Write back to the status register
+      # CPU SIDE
+      
+	  #CTL3
+      movi r5, 0x2   # button are connected to IRQ1 (2nd bit of ctl3)
+      wrctl ctl3, r5 # enable ints for IRQ1/buttons
 
-    ret                             # Return from subroutine
-		
+      #CTL0
+      movi r4, 0x1
+      wrctl ctl0, r4 # enable ints globally (bit 0)
+      ret
 
 IDLE:   br  IDLE
 
@@ -180,3 +183,4 @@ BIT_CODES:  .byte     0b00111111, 0b00000110, 0b01011011, 0b01001111
 			.byte     0b00111001, 0b01011110, 0b01111001, 0b01110001
 
             .end
+	
