@@ -58,15 +58,16 @@ _start:
         */
 		
 	movia sp, STACK_ADD # Initialize the stack pointer
-	movia r7, BUTTONS_BASE
+	movia r4, BUTTONS_BASE
+	movia r7, HEX_BASE1
 	movia r9, 1
 	call enable_button_interrupts
 	br IDLE
 	
 KEY_ISR: # Control the HEX displays here, can move to different file in Monitor Program
-	#SAVE ra TO PREVENT CLOBBERED REGISTER
-	subi    sp, sp, 4
-    stw     ra, 0(sp)
+
+	subi sp, sp, 4
+	stw ra, 0(sp)
 
 	movia   r4, BUTTONS_BASE      # Load base address of BUTTONS into r4
     ldwio   r5, 12(r4)  # Load the edge capture register to determine which button was pressed
@@ -86,9 +87,8 @@ KEY_ISR: # Control the HEX displays here, can move to different file in Monitor 
     andi    r6, r5, 0x8
     bne     r6, r0, TOGGLE_HEX3
 	
-    # Restore the ra register
-    ldw     ra, 0(sp)
-    addi    sp, sp, 4
+	ldw ra, 0(sp)
+	addi sp, sp, 4
 	
     # Finish the ISR
     ret
@@ -97,42 +97,39 @@ TOGGLE_HEX0:
 	
 	ldwio   r6, 0(r7)		  # Read the current
     xori    r6, r6, 0x00      		# Toggle the state
-    mov   	r4, r6
+    movia   r4, 0x1
     movia 	r5, 0x00		
     call HEX_DISP
+	br IDLE
 	
-	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
 	
 TOGGLE_HEX1:
 	
 	ldwio   r6, 0(r7)		  # Read the current
     xori    r6, r6, 0x10      		# Toggle the state
-    mov   	r4, r6
+    movia   r4, 0x1
     movia 	r5, 0x01		
     call HEX_DISP
-
-	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
+	br IDLE
 	
 TOGGLE_HEX2:
 	
 	ldwio   r6, 0(r7)		  # Read the current
     xori    r6, r6, 0x20      		# Toggle the state
-    mov   	r4, r6
+    movia   r4, 0x1
     movia 	r5, 0x02		
     call HEX_DISP
-
-	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
+	br IDLE
 
 TOGGLE_HEX3:
 	
 	ldwio   r6, 0(r7)		  # Read the current
     xori    r6, r6, 0x30      		# Toggle the state
-    mov   	r4, r6
+    movia   r4, 0x1
     movia 	r5, 0x03		
     call HEX_DISP
+	br IDLE
 
-
-	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
 
 enable_button_interrupts:
 	
@@ -141,16 +138,11 @@ enable_button_interrupts:
 	# Enable interrupts for all buttons by setting their corresponding bits in the interrupt mask register
     movi    r5, 0xF         # we have 4 buttons and want to enable interrupts for all
     stwio   r5, 8(r4)       # Write to interrupt mask register at offset
-	
 	# clear any pending button interrupts by writing to the edge capture register
     stwio   r5, 12(r4)   # Write to edge capture register at offset to clear it
-
-      # CPU SIDE
-      
 	  #CTL3
       movi r5, 0x2   # button are connected to IRQ1 (2nd bit of ctl3)
       wrctl ctl3, r5 # enable ints for IRQ1/buttons
-
       #CTL0
       movi r4, 0x1
       wrctl ctl0, r4 # enable ints globally (bit 0)
