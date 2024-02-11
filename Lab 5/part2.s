@@ -66,7 +66,6 @@ KEY_ISR: # Control the HEX displays here, can move to different file in Monitor 
 	#SAVE ra TO PREVENT CLOBBERED REGISTER
 	subi    sp, sp, 4
     stw     ra, 0(sp)
-	
 
 	movia   r4, BUTTONS_BASE      # Load base address of BUTTONS into r4
     ldwio   r5, 12(r4)  # Load the edge capture register to determine which button was pressed
@@ -75,6 +74,8 @@ KEY_ISR: # Control the HEX displays here, can move to different file in Monitor 
     # Check for KEY0
     andi    r6, r5, 0x1
     bne     r6, r0, TOGGLE_HEX0
+	
+	/*
     # Check for KEY1
     andi    r6, r5, 0x2
     bne     r6, r0, TOGGLE_HEX1
@@ -84,7 +85,8 @@ KEY_ISR: # Control the HEX displays here, can move to different file in Monitor 
     # Check for KEY3
     andi    r6, r5, 0x8
     bne     r6, r0, TOGGLE_HEX3
-
+	*/
+	
     # Restore the ra register
     ldw     ra, 0(sp)
     addi    sp, sp, 4
@@ -98,15 +100,16 @@ TOGGLE_HEX0:
     mov   	r4, r6
     movia 	r5, 0x00		
     call HEX_DISP
-	ret
-
+	
+	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
+/*
 TOGGLE_HEX1:
 	ldwio   r6, 0(r7)		  # Read the current
     xori     r6, r6, 0x10      		# Toggle the state
     mov   	r4, r6
     movia 	r5, 0x01		
     call HEX_DISP
-	ret
+	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
 	
 TOGGLE_HEX2:
 	ldwio   r6, 0(r7)		  # Read the current
@@ -114,7 +117,7 @@ TOGGLE_HEX2:
     mov   	r4, r6
     movia 	r5, 0x02		
     call HEX_DISP
-	ret
+	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
 
 TOGGLE_HEX3:
 	ldwio   r6, 0(r7)		  # Read the current
@@ -122,9 +125,11 @@ TOGGLE_HEX3:
     mov   	r4, r6
     movia 	r5, 0x03		
     call HEX_DISP
-	ret
+	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
+*/
 
 enable_button_interrupts:
+	
     movia   r4, BUTTONS_BASE       # Load base address of buttons into r4
     
 	# Enable interrupts for all buttons by setting their corresponding bits in the interrupt mask register
@@ -143,7 +148,7 @@ enable_button_interrupts:
       #CTL0
       movi r4, 0x1
       wrctl ctl0, r4 # enable ints globally (bit 0)
-      ret
+	  ret
 
 IDLE:   br  IDLE
 
