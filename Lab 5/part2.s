@@ -61,6 +61,7 @@ _start:
 	movia r7, BUTTONS_BASE
 	movia r9, 1
 	call enable_button_interrupts
+	br IDLE
 	
 KEY_ISR: # Control the HEX displays here, can move to different file in Monitor Program
 	#SAVE ra TO PREVENT CLOBBERED REGISTER
@@ -75,7 +76,6 @@ KEY_ISR: # Control the HEX displays here, can move to different file in Monitor 
     andi    r6, r5, 0x1
     bne     r6, r0, TOGGLE_HEX0
 	
-	/*
     # Check for KEY1
     andi    r6, r5, 0x2
     bne     r6, r0, TOGGLE_HEX1
@@ -85,48 +85,54 @@ KEY_ISR: # Control the HEX displays here, can move to different file in Monitor 
     # Check for KEY3
     andi    r6, r5, 0x8
     bne     r6, r0, TOGGLE_HEX3
-	*/
 	
     # Restore the ra register
     ldw     ra, 0(sp)
     addi    sp, sp, 4
-
+	
     # Finish the ISR
-    ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
+    ret
 
 TOGGLE_HEX0:
+	
 	ldwio   r6, 0(r7)		  # Read the current
-    xori     r6, r6, 0x00      		# Toggle the state
+    xori    r6, r6, 0x00      		# Toggle the state
     mov   	r4, r6
     movia 	r5, 0x00		
     call HEX_DISP
 	
 	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
-/*
+	
 TOGGLE_HEX1:
+	
 	ldwio   r6, 0(r7)		  # Read the current
-    xori     r6, r6, 0x10      		# Toggle the state
+    xori    r6, r6, 0x10      		# Toggle the state
     mov   	r4, r6
     movia 	r5, 0x01		
     call HEX_DISP
+
 	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
 	
 TOGGLE_HEX2:
+	
 	ldwio   r6, 0(r7)		  # Read the current
-    xori     r6, r6, 0x20      		# Toggle the state
+    xori    r6, r6, 0x20      		# Toggle the state
     mov   	r4, r6
     movia 	r5, 0x02		
     call HEX_DISP
+
 	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
 
 TOGGLE_HEX3:
+	
 	ldwio   r6, 0(r7)		  # Read the current
-    xori     r6, r6, 0x30      		# Toggle the state
+    xori    r6, r6, 0x30      		# Toggle the state
     mov   	r4, r6
     movia 	r5, 0x03		
     call HEX_DISP
+
+
 	ret #CLOBBERED REGISTERS sp ra HAPPENS HERE
-*/
 
 enable_button_interrupts:
 	
@@ -188,4 +194,3 @@ BIT_CODES:  .byte     0b00111111, 0b00000110, 0b01011011, 0b01001111
 			.byte     0b00111001, 0b01011110, 0b01111001, 0b01110001
 
             .end
-	
