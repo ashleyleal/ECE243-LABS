@@ -2,48 +2,54 @@
 .equ HEX_BASE2, 0xff200030
 .equ BUTTONS_BASE, 0xff200050
 .equ STACK_ADD, 0x200000
+
 /******************************************************************************
- * Write an interrupt service routine
+ * Write an interrupt service routine (ISR)
  *****************************************************************************/
 .section .exceptions, "ax"
 IRQ_HANDLER:
         # Save registers on the stack
-        subi    sp, sp, 28          # Make room on the stack for et, ra, r20, r3, r4, r5, ea
-        stw     et, 0(sp)
-        stw     ra, 4(sp)
-        stw     r20, 8(sp)
-        stw     r3, 12(sp)         # Save r3
-        stw     r4, 16(sp)         # Save r4
-        stw     r5, 20(sp)         # Save r5
-
+        subi    sp, sp, 44          # Adjust stack pointer for saved registers to 44 bytes
+        stw     et, 0(sp)           # Save exception temporary register
+        stw     ra, 4(sp)           # Save return address
+        stw     r20, 8(sp)          # Save general-purpose register
+        stw     r3, 12(sp)          # Save general-purpose register
+        stw     r4, 16(sp)          # Save general-purpose register
+        stw     r5, 20(sp)          # Save general-purpose register
+        stw     r6, 24(sp)          # Save r6 to the stack
+        stw     r7, 28(sp)          # Save r7 to the stack
+        stw     r2, 32(sp)          # Save r2 to the stack
+        stw     r8, 36(sp)          # Save r8 to the stack
+        # Exception handling
         rdctl   et, ctl4            # Read exception type
-        beq     et, r0, SKIP_EA_DEC # Not external?
-        subi    ea, ea, 4           # Decrement ea by 4 for external interrupts
-
+        beq     et, r0, SKIP_EA_DEC # Check if not external interrupt
+        subi    ea, ea, 4           # Adjust exception address for external interrupts
 SKIP_EA_DEC:
-        stw     ea, 24(sp)          # Save ea
+        stw     ea, 40(sp)          # Save exception address
         andi    r20, et, 0x2        # Check if interrupt is from pushbuttons
-        beq     r20, r0, END_ISR    # If not, ignore this interrupt
-        call    KEY_ISR             # If yes, call the pushbutton ISR
-
+        beq     r20, r0, END_ISR    # If not, skip to end
+        call    KEY_ISR             # Handle pushbutton interrupt
 END_ISR:
-        ldw     et, 0(sp)           # Restore registers
+        # Restore registers
+        ldw     et, 0(sp)
         ldw     ra, 4(sp)
         ldw     r20, 8(sp)
-        ldw     r3, 12(sp)          # Restore r3
-        ldw     r4, 16(sp)          # Restore r4
-        ldw     r5, 20(sp)          # Restore r5
-        ldw     ea, 24(sp)
-        addi    sp, sp, 28          # Restore stack pointer
+        ldw     r3, 12(sp)
+        ldw     r4, 16(sp)
+        ldw     r5, 20(sp)
+        ldw     r6, 24(sp)
+        ldw     r7, 28(sp)
+        ldw     r2, 32(sp)         # Restore r2 from the stack
+        ldw     r8, 36(sp)         # Restore r8 from the stack
+        ldw     ea, 40(sp)
+        addi    sp, sp, 44         # Restore stack pointer
         eret                        # Return from exception
-                     # return from exception
-
 /*********************************************************************************
- * set where to go upon reset
+ * Set where to go upon reset
  ********************************************************************************/
 .section .reset, "ax"
         movia   r8, _start
-        jmp    r8
+        jmp     r8
 
 /*********************************************************************************
  * Main program
@@ -51,85 +57,72 @@ END_ISR:
 .text
 .global  _start
 _start:
-        /*
-        1. Initialize the stack pointer
-        2. set up keys to generate interrupts
-        3. enable interrupts in NIOS II
-        */
-		
-	movia sp, STACK_ADD # Initialize the stack pointer
-	movia r4, BUTTONS_BASE
-	movia r7, HEX_BASE1
-	movia r9, 1
-	call enable_button_interrupts
-	br IDLE
+        # Initialize stack and set up for interrupts
+        movia   sp, STACK_ADD          # Initialize the stack pointer
+        movia   r4, BUTTONS_BASE
+        movia   r7, HEX_BASE1
+        movia   r9, 0xF
+        call    enable_button_interrupts
+        br      IDLE
 	
 KEY_ISR: # Control the HEX displays here, can move to different file in Monitor Program
 
-	subi sp, sp, 4
-	stw ra, 0(sp)
+	br SAVE
 
-	movia   r4, BUTTONS_BASE      # Load base address of BUTTONS into r4
-    ldwio   r5, 12(r4)  # Load the edge capture register to determine which button was pressed
-    stwio   r9, 12(r4)  # Clear the edge capture register to acknowledge the interrupt
+	TOGGLE_HEX0:
+    	movia   r4, 0x0
+    	movia 	r5, 0x00		
+    	call HEX_DISP
+		br RESTORE
 
-    # Check for KEY0
-    andi    r6, r5, 0x1
-    bne     r6, r0, TOGGLE_HEX0
-	
-    # Check for KEY1
-    andi    r6, r5, 0x2
-    bne     r6, r0, TOGGLE_HEX1
-    # Check for KEY2
-    andi    r6, r5, 0x4
-    bne     r6, r0, TOGGLE_HEX2
-    # Check for KEY3
-    andi    r6, r5, 0x8
-    bne     r6, r0, TOGGLE_HEX3
-	
-	ldw ra, 0(sp)
-	addi sp, sp, 4
-	
-    # Finish the ISR
-    ret
+	TOGGLE_HEX1:
+    	movia   r4, 0x1
+    	movia 	r5, 0x01		
+    	call HEX_DISP
+		br RESTORE
 
-TOGGLE_HEX0:
+	TOGGLE_HEX2:
+    	movia   r4, 0x2
+    	movia 	r5, 0x02		
+    	call HEX_DISP
+		br RESTORE
 	
-	ldwio   r6, 0(r7)		  # Read the current
-    xori    r6, r6, 0x00      		# Toggle the state
-    movia   r4, 0x1
-    movia 	r5, 0x00		
-    call HEX_DISP
-	br IDLE
-	
-	
-TOGGLE_HEX1:
-	
-	ldwio   r6, 0(r7)		  # Read the current
-    xori    r6, r6, 0x10      		# Toggle the state
-    movia   r4, 0x1
-    movia 	r5, 0x01		
-    call HEX_DISP
-	br IDLE
-	
-TOGGLE_HEX2:
-	
-	ldwio   r6, 0(r7)		  # Read the current
-    xori    r6, r6, 0x20      		# Toggle the state
-    movia   r4, 0x1
-    movia 	r5, 0x02		
-    call HEX_DISP
-	br IDLE
+	TOGGLE_HEX3:
+    	movia   r4, 0x3
+    	movia 	r5, 0x03		
+    	call HEX_DISP
+		br RESTORE
 
-TOGGLE_HEX3:
-	
-	ldwio   r6, 0(r7)		  # Read the current
-    xori    r6, r6, 0x30      		# Toggle the state
-    movia   r4, 0x1
-    movia 	r5, 0x03		
-    call HEX_DISP
-	br IDLE
+	SAVE:
+		subi sp, sp, 4
+		stw ra, 0(sp)
 
+	LOAD:
+		movia   r4, BUTTONS_BASE      # Load base address of BUTTONS into r4
+    	ldwio   r5, 12(r4)  # Load the edge capture register to determine which button was pressed
+    	stwio   r9, 12(r4)  # Clear the edge capture register to acknowledge the interrupt
+	
+    CHECK_KEY0:
+    	andi    r6, r5, 0x1
+    	bne     r6, r0, TOGGLE_HEX0
+	
+    CHECK_KEY1:
+    	andi    r6, r5, 0x2
+		bne     r6, r0, TOGGLE_HEX1
+
+    CHECK_KEY2:
+    	andi    r6, r5, 0x4
+		bne     r6, r0, TOGGLE_HEX2
+
+    CHECK_KEY3:
+    	andi    r6, r5, 0x8
+    	bne     r6, r0, TOGGLE_HEX3
+
+	RESTORE:
+		ldw ra, 0(sp)
+		addi sp, sp, 4
+	
+	ret
 
 enable_button_interrupts:
 	
