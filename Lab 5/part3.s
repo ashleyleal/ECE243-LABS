@@ -41,12 +41,10 @@ SKIP_EA_DEC:
     stw ea, 16(sp)
 
     # Determine interrupt source (button or timer)
-	
-	movi r4, 0b10
-	movi r5, 0b01
-	
-	beq et, r4, HANDLE_BUTTON
+	movi r4, 0x1
+	movi r5, 0x2
 	beq et, r5, HANDLE_TIMER
+	beq et, r4, HANDLE_BUTTON
     br END_ISR
 
 HANDLE_BUTTON:
@@ -114,6 +112,7 @@ KEY_ISR:
     stwio r6, 12(r9)   # Clear the edge capture register to acknowledge the interrupt (by writing 0xF)
     
     # XOR the current value of RUN to toggle
+	movia r7, RUN
     ldw r5, 0(r7)
     xori r5, r5, 0x1   # Toggle RUN value
     stw r5, 0(r7)      # Update RUN
@@ -127,7 +126,6 @@ TIMER_ISR:
     # Save ra
     subi sp, sp, 4
     stw ra, 0(sp)
-	
   
     # Acknowledge the interrupt
     movia r2, TIMER0_BASE
@@ -138,10 +136,12 @@ TIMER_ISR:
 	ldw r5, 0(r7)
 
     # Load the value of count
+	movi r11, COUNT
     ldw r14, 0(r11)
 	add r4, r14, r5 # Add whatever the value in run is to count
 	stw r4, 0(r11) # Write the new value of count
 	stwio r4, 0(r8)         # Update LEDs
+	movia r4, 0xff202000
 
     # Restore ra
     ldw ra, 0(sp)
@@ -152,7 +152,7 @@ TIMER_ISR:
 CONFIG_TIMER:
     # DEVICE SIDE
     movia r4, 0xff202000
-    movia r5, 25000000
+    movia r5, 2500000000
     stwio r0, 0(r4) # Clear TO
 	movi r2, 0x8 # Stop it
     stwio r2, 4(r4) # Stop timer
