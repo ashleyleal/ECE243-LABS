@@ -128,9 +128,7 @@ TIMER_ISR:
     subi sp, sp, 4
     stw ra, 0(sp)
 	
-	rdctl   r11, ctl0    # Disable interrupts
-    wrctl   ctl0, r0
-    
+  
     # Acknowledge the interrupt
     movia r2, TIMER0_BASE
     movi r4, 0
@@ -149,7 +147,6 @@ TIMER_ISR:
     ldw ra, 0(sp)
     addi sp, sp, 4
 	
-	wrctl   ctl0, r11    # Re-enable interrupts
     ret
 
 CONFIG_TIMER:
