@@ -35,16 +35,18 @@ IRQ_HANDLER:
     # Check if external interrupt
     beq et, r0, SKIP_EA_DEC
     subi ea, ea, 4
+	
 
 SKIP_EA_DEC:
     stw ea, 16(sp)
 
     # Determine interrupt source (button or timer)
-    andi r20, et, 0x2 # Check if button interrupt
-    andi r21, et, 0x1 # Check if timer interrupt
-
-    bne r20, r0, HANDLE_BUTTON
-    bne r21, r0, HANDLE_TIMER
+	
+	movi r4, 0b10
+	movi r5, 0b01
+	
+	beq et, r4, HANDLE_BUTTON
+	beq et, r5, HANDLE_TIMER
     br END_ISR
 
 HANDLE_BUTTON:
@@ -125,6 +127,9 @@ TIMER_ISR:
     # Save ra
     subi sp, sp, 4
     stw ra, 0(sp)
+	
+	rdctl   r11, ctl0    # Disable interrupts
+    wrctl   ctl0, r0
     
     # Acknowledge the interrupt
     movia r2, TIMER0_BASE
@@ -143,6 +148,8 @@ TIMER_ISR:
     # Restore ra
     ldw ra, 0(sp)
     addi sp, sp, 4
+	
+	wrctl   ctl0, r11    # Re-enable interrupts
     ret
 
 CONFIG_TIMER:
