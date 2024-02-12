@@ -40,9 +40,9 @@ END_ISR:
         ldw     r5, 20(sp)
         ldw     r6, 24(sp)
         ldw     r7, 28(sp)
-        ldw     r2, 32(sp)         # Restore r2 from the stack
-        ldw     r8, 36(sp)         # Restore r8 from the stack
-        ldw     r14, 40(sp)        # Restore r10 from the stack
+        ldw     r2, 32(sp)        
+        ldw     r8, 36(sp)         
+        ldw     r14, 40(sp)        
         ldw     ea, 44(sp)
         addi    sp, sp, 48         # Restore stack pointer
         eret                        # Return from exception
