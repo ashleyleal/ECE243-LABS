@@ -12,15 +12,15 @@ IRQ_HANDLER:
         subi    sp, sp, 48          # Adjust stack pointer for saved registers to 48 bytes
         stw     et, 0(sp)           # Save exception temporary register
         stw     ra, 4(sp)           # Save return address
-        stw     r20, 8(sp)          # Save general-purpose register
-        stw     r3, 12(sp)          # Save general-purpose register
-        stw     r4, 16(sp)          # Save general-purpose register
-        stw     r5, 20(sp)          # Save general-purpose register
-        stw     r6, 24(sp)          # Save r6 to the stack
-        stw     r7, 28(sp)          # Save r7 to the stack
-        stw     r2, 32(sp)          # Save r2 to the stack
-        stw     r8, 36(sp)          # Save r8 to the stack
-        stw     r14, 40(sp)         # Save r10 to the stack
+        stw     r20, 8(sp)          
+        stw     r3, 12(sp)        
+        stw     r4, 16(sp)        
+        stw     r5, 20(sp)          
+        stw     r6, 24(sp)        
+        stw     r7, 28(sp)          
+        stw     r2, 32(sp)         
+        stw     r8, 36(sp)         
+        stw     r14, 40(sp)         
         # Exception handling
         rdctl   et, ctl4            # Read exception type
         beq     et, r0, SKIP_EA_DEC # Check if not external interrupt
