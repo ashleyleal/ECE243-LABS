@@ -9,7 +9,7 @@
 .section .exceptions, "ax"
 IRQ_HANDLER:
         # Save registers on the stack
-        subi    sp, sp, 44          # Adjust stack pointer for saved registers to 44 bytes
+        subi    sp, sp, 48          # Adjust stack pointer for saved registers to 48 bytes
         stw     et, 0(sp)           # Save exception temporary register
         stw     ra, 4(sp)           # Save return address
         stw     r20, 8(sp)          # Save general-purpose register
@@ -20,12 +20,13 @@ IRQ_HANDLER:
         stw     r7, 28(sp)          # Save r7 to the stack
         stw     r2, 32(sp)          # Save r2 to the stack
         stw     r8, 36(sp)          # Save r8 to the stack
+        stw     r14, 40(sp)         # Save r10 to the stack
         # Exception handling
         rdctl   et, ctl4            # Read exception type
         beq     et, r0, SKIP_EA_DEC # Check if not external interrupt
         subi    ea, ea, 4           # Adjust exception address for external interrupts
 SKIP_EA_DEC:
-        stw     ea, 40(sp)          # Save exception address
+        stw     ea, 44(sp)          # Save exception address
         andi    r20, et, 0x2        # Check if interrupt is from pushbuttons
         beq     r20, r0, END_ISR    # If not, skip to end
         call    KEY_ISR             # Handle pushbutton interrupt
@@ -41,8 +42,9 @@ END_ISR:
         ldw     r7, 28(sp)
         ldw     r2, 32(sp)         # Restore r2 from the stack
         ldw     r8, 36(sp)         # Restore r8 from the stack
-        ldw     ea, 40(sp)
-        addi    sp, sp, 44         # Restore stack pointer
+        ldw     r14, 40(sp)        # Restore r10 from the stack
+        ldw     ea, 44(sp)
+        addi    sp, sp, 48         # Restore stack pointer
         eret                        # Return from exception
 /*********************************************************************************
  * Set where to go upon reset
@@ -62,38 +64,92 @@ _start:
         movia   r4, BUTTONS_BASE
         movia   r7, HEX_BASE1
         movia   r9, 0xF
+		
+		# Status of each hex
+		movia r14, HEX_STATUSES	 
+		
         call    enable_button_interrupts
         br      IDLE
+		
 	
 KEY_ISR: # Control the HEX displays here, can move to different file in Monitor Program
 
 	br SAVE
-
+	
 	TOGGLE_HEX0:
+		ldw     r4, 0(r14)            # Load current HEX display status
+		bne r4, r0, CLEAR_HEX0
+		addi	r4, r4, 0xFF
+		stw		r4, 0(r14)
     	movia   r4, 0x0
-    	movia 	r5, 0x00		
-    	call HEX_DISP
-		br RESTORE
-
-	TOGGLE_HEX1:
-    	movia   r4, 0x1
-    	movia 	r5, 0x01		
-    	call HEX_DISP
-		br RESTORE
-
-	TOGGLE_HEX2:
-    	movia   r4, 0x2
-    	movia 	r5, 0x02		
+    	movia 	r5, 0x00
     	call HEX_DISP
 		br RESTORE
 	
-	TOGGLE_HEX3:
-    	movia   r4, 0x3
-    	movia 	r5, 0x03		
+	CLEAR_HEX0:
+		subi	r4, r4, 0xFF
+		stw		r4, 0(r14)
+		movia   r4, 0x10
+		movia 	r5, 0x00
+		call HEX_DISP
+		BR RESTORE
+	
+	TOGGLE_HEX1:
+		ldw     r4, 4(r14)            # Load current HEX display status
+		bne r4, r0, CLEAR_HEX1
+		addi	r4, r4, 0xFF
+		stw		r4, 4(r14)
+    	movia   r4, 0x1
+    	movia 	r5, 0x01
     	call HEX_DISP
 		br RESTORE
+	
+	CLEAR_HEX1:
+		subi	r4, r4, 0xFF
+		stw		r4, 4(r14)
+    	movia   r4, 0x10
+    	movia 	r5, 0x01
+		call HEX_DISP
+		BR RESTORE
+
+    TOGGLE_HEX2:
+        ldw     r4, 8(r14)            
+        bne     r4, r0, CLEAR_HEX2
+        addi    r4, r4, 0xFF
+        stw     r4, 8(r14)
+        movia   r4, 0x2
+        movia   r5, 0x02
+        call    HEX_DISP
+        br      RESTORE
+
+    CLEAR_HEX2:
+        subi    r4, r4, 0xFF
+        stw     r4, 8(r14)
+        movia   r4, 0x10
+        movia   r5, 0x02
+        call    HEX_DISP
+        br      RESTORE
+
+    TOGGLE_HEX3:
+        ldw     r4, 12(r14)           
+        bne     r4, r0, CLEAR_HEX3
+        addi    r4, r4, 0xFF
+        stw     r4, 12(r14)
+        movia   r4, 0x3
+        movia   r5, 0x03
+        call    HEX_DISP
+        br      RESTORE
+
+    CLEAR_HEX3:
+        subi    r4, r4, 0xFF
+        stw     r4, 12(r14)
+        movia   r4, 0x10
+        movia   r5, 0x03
+        call    HEX_DISP
+        br      RESTORE
 
 	SAVE:
+		movia   r14, HEX_STATUSES     # r14 points to HEX_STATUSES memory location
 		subi sp, sp, 4
 		stw ra, 0(sp)
 
@@ -178,4 +234,9 @@ BIT_CODES:  .byte     0b00111111, 0b00000110, 0b01011011, 0b01001111
 			.byte     0b01111111, 0b01100111, 0b01110111, 0b01111100
 			.byte     0b00111001, 0b01011110, 0b01111001, 0b01110001
 
+HEX_STATUSES:
+			.byte 0b00000000, 0b00000000, 0b00000000, 0b00000000
+			.byte 0b00000000, 0b00000000, 0b00000000, 0b00000000
+			.byte 0b00000000, 0b00000000, 0b00000000, 0b00000000
+			.byte 0b00000000, 0b00000000, 0b00000000, 0b00000000
             .end
