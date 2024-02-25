@@ -2261,10 +2261,14 @@ int right_delay_line[DELAY_SIZE] = {0};
 float damping_ratio = 0.3;  // Adjust damping ratio as needed
 
 void delay(int input_left, int input_right) {
-    // first output the original sound
 	
+	while(!audiop->wsrc) {} // empty loop to wait until output has space
+	
+	// first output the original sound
     audiop->ldata = input_left;
     audiop->rdata = input_right;
+	
+	while(!audiop->wsrc) {} // empty loop to wait until output has space
 
     for (int i = 0; i < DELAY_SIZE; i++) {
         	int output_left = input_left + damping_ratio * left_delay_line[i];
