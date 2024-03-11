@@ -51,7 +51,7 @@ int main(void) {
             y_box[i] += dy[i];
             if (x_box[i] <= 0 || x_box[i] >= 310) dx[i] = -dx[i];
             if (y_box[i] <= 0 || y_box[i] >= 230) dy[i] = -dy[i];
-            draw_box(x_box[i], y_box[i], colour_box[i], 10);
+            draw_box(x_box[i], y_box[i], colour_box[i], 2);
 
             // lines
             if (j == 8) {
